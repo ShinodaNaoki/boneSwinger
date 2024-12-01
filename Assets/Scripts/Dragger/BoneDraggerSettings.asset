@@ -12,9 +12,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a9e2c71848db84a45a5f86391c73eaa9, type: 3}
   m_Name: BoneDraggerSettings
   m_EditorClassIdentifier: 
-  InartiaAmplitude: 5
-  MaxArirDragAngle: 30
-  AirDragAmplitude: 3
-  MaxRestoreAngle: 60
+  InartiaAmplitude: 4
+  MaxArirDragAngle: 100.1
+  AirDragAmplitude: 2.18
+  MaxRestoreAngle: 23.8
   RestoreSpringAmplitude: 1
   AngleOverLimitDumper: 2

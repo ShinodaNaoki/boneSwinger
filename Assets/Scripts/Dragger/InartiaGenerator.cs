@@ -1,5 +1,7 @@
 using NaughtyAttributes;
 using System;
+using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
 namespace Duel.BoneDragger
@@ -18,6 +20,9 @@ namespace Duel.BoneDragger
 
         private Vector3 prevVelocity;
 
+        private Vector3 force;
+        private Queue<Vector3> forceQueue;
+
         private float gravity;
 
         public InartiaParameters Parameters { get; set; }
@@ -27,11 +32,12 @@ namespace Duel.BoneDragger
             get
             {
                 if (Freeze || Parameters.moveScale == 0) return Vector3.zero;
-                var vtmp = prevVelocity - velocity;
-                var vmag = velocity.magnitude * Parameters.moveScale;
+                var vtmp = forceQueue.Aggregate(Vector3.zero, (sum,v) => sum+v);
+                var vmag = vtmp.magnitude * Parameters.moveScale / forceQueue.Count;
                 var vsum = vmag + gravity;
                 // 混合比率としての gravity, ベクトル強度としての gravity で二回掛ける
-                return (vtmp * vmag + Vector3.down * gravity * gravity) / vsum;
+                var f = -vtmp.normalized * vmag + Vector3.down * gravity;
+                return f;
             }
         }
 
@@ -52,9 +58,11 @@ namespace Duel.BoneDragger
         [Button]
         public void Reset()
         {
+            forceQueue = new Queue<Vector3>(Enumerable.Range(0,5).Select(_ => Vector3.zero));
             accumlatedForce = Vector3.zero;
             velocity = Vector3.zero;
             prevVelocity = Vector3.zero;
+            force = Vector3.zero;
             gravity = Mathf.Pow(Parameters.mass, 2);
             prevPosition = target.transform.position;
             expSquare = Parameters.exponent * Parameters.exponent;
@@ -64,33 +72,18 @@ namespace Duel.BoneDragger
         {
             // 移動量を力とする
             var curPos = target.transform.position;
-            prevVelocity = curPos - prevPosition;
-
-            // 慣性力を考慮した現在の位置
-            var move = curPos + velocity - prevPosition;
+            prevVelocity = velocity;
+            velocity = curPos - prevPosition;
             prevPosition = curPos;
 
             if (this.Freeze)
             {
                 return;
             }
-
-            accumlatedForce *= (1 - Parameters.damping);
-            var m1 = adjustMagnitude(accumlatedForce.magnitude, 4f);
-            var m2 = adjustMagnitude(move.magnitude, 4f);
-            var mTotal = m1 + m2;
-            if (mTotal <= Mathf.Epsilon)
-            {
-                return;
-            }
-
-            // 力を積算
-            accumlatedForce = (m1 * accumlatedForce + m2 * move) / mTotal;
-
-            var mNew = adjustMagnitude(accumlatedForce.magnitude, expSquare);
-            var direction = accumlatedForce.normalized;
-            // 対数関数を用いて速度を計算
-            velocity = direction * mNew;
+            force = velocity - prevVelocity;
+            force = force.normalized * adjustMagnitude(force.magnitude, expSquare);
+            forceQueue.Enqueue(force);
+            forceQueue.Dequeue();
         }
 
         private float adjustMagnitude(float mag, float exp)
@@ -115,10 +108,10 @@ namespace Duel.BoneDragger
             var size = UnityEditor.HandleUtility.GetHandleSize(pos0);
             var radius = size * 0.1f;
 
-            var pos1 = pos0 + Force;
+            var pos1 = pos0 + force;
             Gizmos.color = Color.cyan;
             Gizmos.DrawWireSphere(pos1, radius);
-            var pos2 = pos0 + accumlatedForce;
+            var pos2 = pos0 + velocity;
             Gizmos.color = Color.red;
             Gizmos.DrawWireSphere(pos2, radius * 0.8f);
             Gizmos.color = Color.magenta;
