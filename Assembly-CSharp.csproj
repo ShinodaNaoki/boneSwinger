@@ -70,7 +70,7 @@
     <Compile Include="Assets\Scripts\Dragger\BoneDraggerParameters.cs" />
     <Compile Include="Assets\Scripts\Dragger\BoneDragNode.cs" />
     <Compile Include="Assets\Scripts\Dragger\GizmosExtensions.cs" />
-    <Compile Include="Assets\Scripts\Util\GameObjectException.cs" />
+    <Compile Include="Assets\Scripts\Util\GameObjectExtensions.cs" />
     <Compile Include="Assets\Scripts\Old\InartiaWeightOld.cs" />
     <Compile Include="Assets\Scripts\Dragger\BoneDragger.cs" />
     <Compile Include="Assets\Scripts\BackScroller.cs" />
