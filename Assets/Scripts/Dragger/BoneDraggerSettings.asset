@@ -1,0 +1,20 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a9e2c71848db84a45a5f86391c73eaa9, type: 3}
+  m_Name: BoneDraggerSettings
+  m_EditorClassIdentifier: 
+  InartiaAmplitude: 5
+  MaxArirDragAngle: 30
+  AirDragAmplitude: 3
+  MaxRestoreAngle: 60
+  RestoreSpringAmplitude: 1
+  AngleOverLimitDumper: 2

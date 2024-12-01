@@ -8,13 +8,6 @@ namespace Duel.BoneDragger
     [Serializable]
     public class BoneDragNode
     {
-        const bool v1 = false;
-        const float INARTIA_SCALE = v1 ? 1000f : 100000f;
-        const float MAX_AIR_DRAG_ANGLE = 30f;
-        const float AIR_DRAG_MULTIPLIER = v1 ? 1f : 60f;
-        const float MAX_RESTORE_ANGLE = 60f;
-        const float RESTORE_SPRING_MULTIPLIER = v1 ? 10f : 10000f;
-        const float ANGLE_OVER_LIMIT_DAMPER = 2f;
 
         [SerializeField]
         public Rigidbody rigidbody;
@@ -176,13 +169,15 @@ namespace Duel.BoneDragger
             var endPos = nextBone.transform.position;
             var boneDir = endPos - nowPos;
             var look = boneDir.normalized + inartia + dragger.Gravity;
-            var mag = INARTIA_SCALE * inartia.magnitude;
+            look.Normalize();
+            if (look.magnitude <= Mathf.Epsilon) return prevWorldRot;
+            var mag = BoneDraggerSettings.INARTIA_SCALE * inartia.magnitude;
             mag *= WeightInLength == 0 ? 10 : (WeightInLength + FollowingLength) / WeightInLength;
             //Debug.Log($"inamag={inartia.magnitude}, Wfol={FollowingLength}, Win={WeightInLength}, Wpre={PrecedingLength}");
             //Debug.Log($"inartia={inartia}, look={look}, ratio={ratio}, mag={mag}");
 
             var baseDir = flipX ? Vector3.left : Vector3.right;
-            var rot = Quaternion.FromToRotation(baseDir, look);
+            var rot = Quaternion.FromToRotation(baseDir, look.normalized);
             var q = Quaternion.RotateTowards(prevWorldRot, rot, ratio * mag);
             return limitter.LimitAsWorld(q, dragger.Softness, flipX);
         }
@@ -193,8 +188,8 @@ namespace Duel.BoneDragger
             var nowPos = target.position;
             var moveDir = prevPos - nowPos - dragger.Wind;
             var weightRatio = WeightInLength == 0 ? 0 : (WeightInLength + PrecedingLength) / WeightInLength;
-            var ratio = AIR_DRAG_MULTIPLIER * timeScale * moveDir.magnitude * weightRatio;
-            ratio = Mathf.Min(MAX_AIR_DRAG_ANGLE, ratio);
+            var ratio = BoneDraggerSettings.AIR_DRAG_MULTIPLIER * timeScale * moveDir.magnitude * weightRatio;
+            ratio = Mathf.Min(BoneDraggerSettings.MAX_AIR_DRAG_ANGLE, ratio);
             //Debug.Log($"r2={r2}, ratio={ratio}, mag={moveDir.magnitude}, tscl={timeScale}");
             var baseDir = flipX ? Vector3.left : Vector3.right;
             var rot = Quaternion.FromToRotation(baseDir, moveDir);
@@ -206,9 +201,9 @@ namespace Duel.BoneDragger
         private Quaternion RotateByRestoreSpring(BoneDragger dragger)
         {
             var amove = Mathf.Max((1 - airDrag) * (1 - softness), Mathf.Epsilon);
-            var mag = RESTORE_SPRING_MULTIPLIER * Mathf.Pow(dragger.RestoreSpring, 2f) * dragger.DeltaTime;
+            var mag = BoneDraggerSettings.RESTORE_SPRING_MULTIPLIER * Mathf.Pow(dragger.RestoreSpring, 2f) * dragger.DeltaTime;
             var overLimitMultiplier = Mathf.Max(1f, limitter.AngleRatioLocal(prevLocalRot));
-            mag = Mathf.Min(MAX_RESTORE_ANGLE, mag * overLimitMultiplier);
+            mag = Mathf.Min(BoneDraggerSettings.MAX_RESTORE_ANGLE, mag * overLimitMultiplier);
             var newRot = Quaternion.RotateTowards(prevLocalRot, initailRotation, mag);
             //DebugLog($"mag={mag}, prevLocalRot={prevLocalRot}, initailRotation ={initailRotation}");
 
@@ -294,7 +289,8 @@ namespace Duel.BoneDragger
                 var angOver = angle - freeAngle;
                 var maxAng = 180f * softness;
                 var r = Mathf.Min(1f, angOver / maxAng);
-                var easing = r - (1f / ANGLE_OVER_LIMIT_DAMPER) * Mathf.Pow(r, ANGLE_OVER_LIMIT_DAMPER);
+                var damper = BoneDraggerSettings.ANGLE_OVER_LIMIT_DAMPER;
+                var easing = r - (1f / damper) * Mathf.Pow(r, damper);
                 newAng += maxAng * easing;
 
                 return newAng;

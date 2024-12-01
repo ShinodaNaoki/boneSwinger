@@ -234,7 +234,7 @@ MonoBehaviour:
   AirVsMass: 1
   Softness: 0.193
   AngularLimit: 18.4
-  RestoreSpring: 0
+  RestoreSpring: 0.024
   applyPhysics: 1
 --- !u!114 &2359007601902668842
 MonoBehaviour:
