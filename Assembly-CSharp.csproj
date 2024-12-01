@@ -66,6 +66,7 @@
     <Compile Include="Assets\Scripts\Shaker.cs" />
     <Compile Include="Assets\Scripts\Util\SpriteSkinUtil.cs" />
     <Compile Include="Assets\Scripts\Dragger\InartiaGenerator.cs" />
+    <Compile Include="Assets\Scripts\Dragger\BoneDraggerSettings.cs" />
     <Compile Include="Assets\Scripts\Dragger\BoneDraggerParameters.cs" />
     <Compile Include="Assets\Scripts\Dragger\BoneDragNode.cs" />
     <Compile Include="Assets\Scripts\Dragger\GizmosExtensions.cs" />

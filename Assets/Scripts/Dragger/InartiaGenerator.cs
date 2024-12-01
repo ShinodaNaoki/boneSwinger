@@ -27,7 +27,7 @@ namespace Duel.BoneDragger
             get
             {
                 if (Freeze || Parameters.moveScale == 0) return Vector3.zero;
-                var vtmp = velocity - prevVelocity;
+                var vtmp = prevVelocity - velocity;
                 var vmag = velocity.magnitude * Parameters.moveScale;
                 var vsum = vmag + gravity;
                 // 混合比率としての gravity, ベクトル強度としての gravity で二回掛ける
