@@ -1,4 +1,4 @@
-using NaughtyAttributes;
+ï»¿using NaughtyAttributes;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -35,7 +35,7 @@ namespace Duel.BoneDragger
                 var vtmp = forceQueue.Aggregate(Vector3.zero, (sum,v) => sum+v);
                 var vmag = vtmp.magnitude * Parameters.moveScale / forceQueue.Count;
                 var vsum = vmag + gravity;
-                // ¬‡”ä—¦‚Æ‚µ‚Ä‚Ì gravity, ƒxƒNƒgƒ‹‹­“x‚Æ‚µ‚Ä‚Ì gravity ‚Å“ñ‰ñŠ|‚¯‚é
+                // æ··åˆæ¯”ç‡ã¨ã—ã¦ã® gravity, ãƒ™ã‚¯ãƒˆãƒ«å¼·åº¦ã¨ã—ã¦ã® gravity ã§äºŒå›æ›ã‘ã‚‹
                 var f = -vtmp.normalized * vmag + Vector3.down * gravity;
                 return f;
             }
@@ -70,7 +70,7 @@ namespace Duel.BoneDragger
 
         public void Update()
         {
-            // ˆÚ“®—Ê‚ğ—Í‚Æ‚·‚é
+            // ç§»å‹•é‡ã‚’åŠ›ã¨ã™ã‚‹
             var curPos = target.transform.position;
             prevVelocity = velocity;
             velocity = curPos - prevPosition;

@@ -1,4 +1,4 @@
-using Program.Utils;
+ï»¿using Program.Utils;
 using System;
 using UnityEngine;
 using Transform = UnityEngine.Transform;
@@ -75,7 +75,7 @@ namespace Duel.BoneDragger
             flipX = target.lossyScale.x < 0;
 
             var curPos = target.position;
-            // ŒÀŠEŠp“xi‚½‚¾‚µ Softness ‚É‰ž‚¶‚Ä’´‚¦‚ç‚ê‚éj‰Šú‰»
+            // é™ç•Œè§’åº¦ï¼ˆãŸã ã— Softness ã«å¿œã˜ã¦è¶…ãˆã‚‰ã‚Œã‚‹ï¼‰åˆæœŸåŒ–
             limitter.Init(this, dragger.AngularLimit);
 
             var qAir = RotateByAirDrag(dragger);
@@ -83,7 +83,7 @@ namespace Duel.BoneDragger
             var qMix = Quaternion.Slerp(qAir, qIna, dragger.AirVsMass);
 
             var qRes = RotateByRestoreSpring(dragger);
-            // XŽ²”½“]‚¾‚ÆSelectCloserTo‚ªƒoƒO‚é
+            // Xè»¸åè»¢ã ã¨SelectCloserToãŒãƒã‚°ã‚‹
             //var qResult = SelectCloserTo(limitter.worldOrigin.normalized, qMix, qRes);
 
             var diffPos = (curPos - prevPos).magnitude;
@@ -104,7 +104,7 @@ namespace Duel.BoneDragger
             //q = ConsiderSoftness(q);
             if (targetBody != null)
             {
-                Quaternion deltaRot = q * Quaternion.Inverse(prevWorldRot); // rotation‚Ì·•ª‚ð‹‚ß‚é
+                Quaternion deltaRot = q * Quaternion.Inverse(prevWorldRot); // rotationã®å·®åˆ†ã‚’æ±‚ã‚ã‚‹
 
                 targetBody.MoveRotation(ZOnly(deltaRot));
             }
@@ -134,7 +134,7 @@ namespace Duel.BoneDragger
             return az == 0 ? 1f : Mathf.Min(1, bz / az);
         }
 
-        // XŽ²”½“]‚¾‚ÆSelectCloserTo‚ªƒoƒO‚é
+        // Xè»¸åè»¢ã ã¨SelectCloserToãŒãƒã‚°ã‚‹
         [Obsolete]
         private Quaternion SelectCloserTo(Quaternion q0, Quaternion q1, Quaternion q2)
         {
@@ -222,7 +222,7 @@ namespace Duel.BoneDragger
 
             public RestoreScale(Transform t1)
             {
-                // XŽ²”½“]‚µ‚Ä‚éæ‘ctransform‚ðŒ©‚Â‚¯‚é
+                // Xè»¸åè»¢ã—ã¦ã‚‹å…ˆç¥–transformã‚’è¦‹ã¤ã‘ã‚‹
                 target = t1;
                 while (t1 != null)
                 {
@@ -237,7 +237,7 @@ namespace Duel.BoneDragger
             }
 
             /**
-             * dispose ‚³‚ê‚é‚Ü‚ÅˆêŽž“I‚ÉXŽ²”½“]‚ð‚È‚­‚·
+             * dispose ã•ã‚Œã‚‹ã¾ã§ä¸€æ™‚çš„ã«Xè»¸åè»¢ã‚’ãªãã™
              */
             public void CancelFlipX()
             {
@@ -254,7 +254,7 @@ namespace Duel.BoneDragger
             }
         }
 
-        // ‰ñ“]”ÍˆÍi‚½‚¾‚µ Softness ‚É‰ž‚¶‚Ä’´‚¦‚ç‚ê‚éj
+        // å›žè»¢ç¯„å›²ï¼ˆãŸã ã— Softness ã«å¿œã˜ã¦è¶…ãˆã‚‰ã‚Œã‚‹ï¼‰
         internal class AngleLimitter
         {
             public Quaternion localOrigin { get; private set; }
@@ -300,7 +300,7 @@ namespace Duel.BoneDragger
             {
                 float angle = Quaternion.Angle(q, worldOrigin);
                 q = q.normalized;
-                // freeAngleˆÈ‰º‚È‚ç•â³‚È‚µ
+                // freeAngleä»¥ä¸‹ãªã‚‰è£œæ­£ãªã—
                 if (angle < freeAngle)
                 {
                     return q;
@@ -313,11 +313,11 @@ namespace Duel.BoneDragger
                     newAng = -newAng;
                 }
 
-                // q‚ÉŠp“x‚ª‹ß‚¢•û‚ð‘I‘ð
+                // qã«è§’åº¦ãŒè¿‘ã„æ–¹ã‚’é¸æŠž
                 float ang1 = Quaternion.Angle(q, worldMin);
                 float ang2 = Quaternion.Angle(q, worldMax);
                 Quaternion baseAng = ang1 < ang2 ? worldMin : worldMax;
-                // •â³‚³‚ê‚½•ª‚¾‚¯‹«ŠEŠp“x‚É‹ß‚Ã‚¯‚é
+                // è£œæ­£ã•ã‚ŒãŸåˆ†ã ã‘å¢ƒç•Œè§’åº¦ã«è¿‘ã¥ã‘ã‚‹
                 Quaternion newRot = Quaternion.RotateTowards(q, baseAng, angle - newAng);
                 return newRot;
             }
@@ -326,7 +326,7 @@ namespace Duel.BoneDragger
             {
                 float angle = Quaternion.Angle(q, localOrigin);
                 q = q.normalized;
-                // freeAngleˆÈ‰º‚È‚ç•â³‚È‚µ
+                // freeAngleä»¥ä¸‹ãªã‚‰è£œæ­£ãªã—
                 if (angle < freeAngle)
                 {
                     return q;
@@ -339,11 +339,11 @@ namespace Duel.BoneDragger
                     newAng = -newAng;
                 }
 
-                // q‚ÉŠp“x‚ª‹ß‚¢•û‚ð‘I‘ð
+                // qã«è§’åº¦ãŒè¿‘ã„æ–¹ã‚’é¸æŠž
                 float ang1 = Quaternion.Angle(q, localMin);
                 float ang2 = Quaternion.Angle(q, localMax);
                 Quaternion baseAng = ang1 < ang2 ? localMin : localMax;
-                // •â³‚³‚ê‚½•ª‚¾‚¯‹«ŠEŠp“x‚É‹ß‚Ã‚¯‚é
+                // è£œæ­£ã•ã‚ŒãŸåˆ†ã ã‘å¢ƒç•Œè§’åº¦ã«è¿‘ã¥ã‘ã‚‹
                 Quaternion newRot = Quaternion.RotateTowards(q, baseAng, angle - newAng);
                 return newRot;
             }

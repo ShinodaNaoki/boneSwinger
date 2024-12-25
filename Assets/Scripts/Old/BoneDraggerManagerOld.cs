@@ -1,4 +1,4 @@
-using NaughtyAttributes;
+ï»¿using NaughtyAttributes;
 using System.Collections.Generic;
 using System.Linq;
 using Unity.VisualScripting;
@@ -104,7 +104,7 @@ namespace Old.V1
         private void Update()
         {
             if (Application.isPlaying) return;
-            // ƒGƒfƒBƒ^‚Åì‹Æ’†‚ÉXV‚³‚ê‚é‚æ‚¤‚É
+            // ã‚¨ãƒ‡ã‚£ã‚¿ã§ä½œæ¥­ä¸­ã«æ›´æ–°ã•ã‚Œã‚‹ã‚ˆã†ã«
             FixedUpdate();
         }
 #endif

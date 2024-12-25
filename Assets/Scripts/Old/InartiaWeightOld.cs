@@ -1,4 +1,4 @@
-using NaughtyAttributes;
+ï»¿using NaughtyAttributes;
 using System;
 using UnityEngine;
 
@@ -40,7 +40,7 @@ namespace Old.V1
                 var vtmp = velocity - prevVelocity;
                 var vmag = velocity.magnitude * moveScale;
                 var vsum = vmag + gravity;
-                // ¬‡”ä—¦‚Æ‚µ‚Ä‚Ì gravity, ƒxƒNƒgƒ‹‹­“x‚Æ‚µ‚Ä‚Ì gravity ‚Å“ñ‰ñŠ|‚¯‚é
+                // æ··åˆæ¯”ç‡ã¨ã—ã¦ã® gravity, ãƒ™ã‚¯ãƒˆãƒ«å¼·åº¦ã¨ã—ã¦ã® gravity ã§äºŒå›æ›ã‘ã‚‹
                 return (vtmp * vmag + Vector3.down * gravity * gravity) / vsum;
             }
         }
@@ -68,11 +68,11 @@ namespace Old.V1
 
         public void Update()
         {
-            // ˆÚ“®—Ê‚ğ—Í‚Æ‚·‚é
+            // ç§»å‹•é‡ã‚’åŠ›ã¨ã™ã‚‹
             var curPos = target.transform.position;
             prevVelocity = curPos - prevPosition;
 
-            // Šµ«—Í‚ğl—¶‚µ‚½Œ»İ‚ÌˆÊ’u
+            // æ…£æ€§åŠ›ã‚’è€ƒæ…®ã—ãŸç¾åœ¨ã®ä½ç½®
             var move = curPos + velocity - prevPosition;
             prevPosition = curPos;
 
@@ -90,12 +90,12 @@ namespace Old.V1
                 return;
             }
 
-            // —Í‚ğÏZ
+            // åŠ›ã‚’ç©ç®—
             accumlatedForce = (m1 * accumlatedForce + m2 * move) / mTotal;
 
             var mNew = adjustMagnitude(accumlatedForce.magnitude, expSquare);
             var direction = accumlatedForce.normalized;
-            // ‘Î”ŠÖ”‚ğ—p‚¢‚Ä‘¬“x‚ğŒvZ
+            // å¯¾æ•°é–¢æ•°ã‚’ç”¨ã„ã¦é€Ÿåº¦ã‚’è¨ˆç®—
             velocity = direction * mNew;
         }
 

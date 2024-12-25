@@ -310,17 +310,6 @@ Transform:
   m_Father: {fileID: 1866635181}
   m_RootOrder: 1
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &817822258 stripped
-MonoBehaviour:
-  m_CorrespondingSourceObject: {fileID: 2543059321543598421, guid: 569c897e5a7dda444bf3e299e19d218d, type: 3}
-  m_PrefabInstance: {fileID: 404603553}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 984179a7f43c73441a8640d5285aa791, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
 --- !u!95 &817822259 stripped
 Animator:
   m_CorrespondingSourceObject: {fileID: 1023496520791994899, guid: 569c897e5a7dda444bf3e299e19d218d, type: 3}
@@ -591,7 +580,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   animator: {fileID: 817822259}
-  draggerManager: {fileID: 817822258}
 --- !u!95 &1866635183
 Animator:
   serializedVersion: 5

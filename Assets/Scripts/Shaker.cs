@@ -1,9 +1,9 @@
-using UnityEngine;
+ï»¿using UnityEngine;
 
 public class Shaker : MonoBehaviour
 {
-    public Vector2 amplitude = Vector2.zero; // U•
-    public Vector2 frequency = Vector2.one; // ü”g”
+    public Vector2 amplitude = Vector2.zero; // æŒ¯å¹…
+    public Vector2 frequency = Vector2.one; // å‘¨æ³¢æ•°
 
     private Vector3 startPosition;
 

@@ -1,4 +1,4 @@
-using System.Collections.Generic;
+ï»¿using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 using UnityEngine.U2D.Animation;
@@ -49,14 +49,14 @@ namespace Program.Util
 
             var skin = go.GetComponent<SpriteSkin>();
             if (skin != null)
-            { // go‚ªSpriteSkin‚Ìˆê‚Â‚¾‚Á‚½ê‡
+            { // goãŒSpriteSkinã®ä¸€ã¤ã ã£ãŸå ´åˆ
                 go = go.FindClosest(x => x.GetComponent<SpriteSkin>() != null);
                 return FindBoneRoot(go, skin);
             }
             var importer = FindImporterRoot(go);
             if (importer == null)
             {
-                // ŠÖŒW‚È‚¢ƒIƒuƒWƒFƒNƒg‚¾‚Á‚½
+                // é–¢ä¿‚ãªã„ã‚ªãƒ–ã‚¸ã‚§ã‚¯ãƒˆã ã£ãŸ
                 return null;
             }
 
@@ -65,7 +65,7 @@ namespace Program.Util
 
             var goal = importer.transform;
             var bone = skin.rootBone;
-            // importer‚É’¼Ú‚Â‚¢‚Ä‚ébone‚ğ’T‚·
+            // importerã«ç›´æ¥ã¤ã„ã¦ã‚‹boneã‚’æ¢ã™
             while (bone.parent != goal)
             {
                 if (bone.parent == null) break;
