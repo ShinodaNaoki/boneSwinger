@@ -1,4 +1,4 @@
-using NaughtyAttributes;
+﻿using NaughtyAttributes;
 using UnityEngine;
 
 [ExecuteAlways]

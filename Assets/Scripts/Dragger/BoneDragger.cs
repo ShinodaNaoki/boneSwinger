@@ -1,4 +1,4 @@
-using NaughtyAttributes;
+ï»¿using NaughtyAttributes;
 using Program.Util;
 using System.Collections.Generic;
 using System.Linq;
@@ -94,7 +94,7 @@ namespace Duel.BoneDragger
         void UpdateCore()
         {
 #if UNITY_EDITOR
-            // ƒGƒfƒBƒ^‚Åì‹Æ’†‚ÉXV‚·‚é‚©‚Ç‚¤‚©
+            // ã‚¨ãƒ‡ã‚£ã‚¿ã§ä½œæ¥­ä¸­ã«æ›´æ–°ã™ã‚‹ã‹ã©ã†ã‹
             if (!parameters.Execute) return;
 #endif
 
@@ -136,7 +136,7 @@ namespace Duel.BoneDragger
                 .Where(br => br.Contains(first)).FirstOrDefault();
             if (branch == null)
             {
-                Debug.LogError("Œq‚ª‚éƒ{[ƒ“‚ªŒ©‚Â‚©‚è‚Ü‚¹‚ñ‚Å‚µ‚½B");
+                Debug.LogError("ç¹‹ãŒã‚‹ãƒœãƒ¼ãƒ³ãŒè¦‹ã¤ã‹ã‚Šã¾ã›ã‚“ã§ã—ãŸã€‚");
                 return;
             }
             InitWithBones(branch.SkipWhile(b => b != first).ToList());

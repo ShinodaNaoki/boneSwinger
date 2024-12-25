@@ -1,4 +1,4 @@
-using Program.Utils;
+ï»¿using Program.Utils;
 using System;
 using System.Linq;
 using UnityEngine;
@@ -41,7 +41,7 @@ namespace Duel.BoneDragger
             }
             if (!result)
             {
-                UnityEngine.Debug.Log("d•¡“o˜^‚ÍŒ©“–‚½‚è‚Ü‚¹‚ñ‚Å‚µ‚½".lime());
+                UnityEngine.Debug.Log("é‡è¤‡ç™»éŒ²ã¯è¦‹å½“ãŸã‚Šã¾ã›ã‚“ã§ã—ãŸ".lime());
             }
         }
 
@@ -53,7 +53,7 @@ namespace Duel.BoneDragger
             {
                 if(b2.Contains(bone))
                 {
-                    UnityEngine.Debug.LogError($"'{d1.name.orange()}' ‚Æ '{d2.name.yellow()}' ‚Í“¯‚¶ƒ{[ƒ“ '{bone.name.lime()}' ‚ğŠÜ‚ñ‚Å‚¢‚Ü‚·");
+                    UnityEngine.Debug.LogError($"'{d1.name.orange()}' ã¨ '{d2.name.yellow()}' ã¯åŒã˜ãƒœãƒ¼ãƒ³ '{bone.name.lime()}' ã‚’å«ã‚“ã§ã„ã¾ã™");
                     result = true;
                 }
             }

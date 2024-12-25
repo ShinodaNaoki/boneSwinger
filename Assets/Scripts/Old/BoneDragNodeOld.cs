@@ -1,4 +1,4 @@
-using System;
+ï»¿using System;
 using UnityEngine;
 using Transform = UnityEngine.Transform;
 
@@ -74,7 +74,7 @@ namespace Old.V1
         {
             if (nextBone == null) return;
             var curPos = target.position;
-            // ŒÀŠEŠp“xi‚½‚¾‚µ Softness ‚É‰‚¶‚Ä’´‚¦‚ç‚ê‚éj‰Šú‰»
+            // é™ç•Œè§’åº¦ï¼ˆãŸã ã— Softness ã«å¿œã˜ã¦è¶…ãˆã‚‰ã‚Œã‚‹ï¼‰åˆæœŸåŒ–
             limitter.Init(this, manager.AngularLimit);
 
             var qAir = RotateByAirDrag(manager);
@@ -104,7 +104,7 @@ namespace Old.V1
             //q = ConsiderSoftness(q);
             if (targetBody != null)
             {
-                Quaternion deltaRot = q * Quaternion.Inverse(prevWorldRot); // rotation‚Ì·•ª‚ğ‹‚ß‚é
+                Quaternion deltaRot = q * Quaternion.Inverse(prevWorldRot); // rotationã®å·®åˆ†ã‚’æ±‚ã‚ã‚‹
 
                 targetBody.MoveRotation(ZOnly(deltaRot));
             }
@@ -194,7 +194,7 @@ namespace Old.V1
             return newRot;
         }
 
-        // ‰ñ“]”ÍˆÍi‚½‚¾‚µ Softness ‚É‰‚¶‚Ä’´‚¦‚ç‚ê‚éj
+        // å›è»¢ç¯„å›²ï¼ˆãŸã ã— Softness ã«å¿œã˜ã¦è¶…ãˆã‚‰ã‚Œã‚‹ï¼‰
         internal class AngleLimitter
         {
             public Quaternion localOrigin { get; private set; }
@@ -239,7 +239,7 @@ namespace Old.V1
             {
                 float angle = Quaternion.Angle(q, worldOrigin);
                 q = q.normalized;
-                // freeAngleˆÈ‰º‚È‚ç•â³‚È‚µ
+                // freeAngleä»¥ä¸‹ãªã‚‰è£œæ­£ãªã—
                 if (angle < freeAngle)
                 {
                     return q;
@@ -247,11 +247,11 @@ namespace Old.V1
 
                 var newAng = AdjustOverLimitAngle(angle, softness);
 
-                // q‚ÉŠp“x‚ª‹ß‚¢•û‚ğ‘I‘ğ
+                // qã«è§’åº¦ãŒè¿‘ã„æ–¹ã‚’é¸æŠ
                 float ang1 = Quaternion.Angle(q, worldMin);
                 float ang2 = Quaternion.Angle(q, worldMax);
                 Quaternion baseAng = ang1 < ang2 ? worldMin : worldMax;
-                // •â³‚³‚ê‚½•ª‚¾‚¯‹«ŠEŠp“x‚É‹ß‚Ã‚¯‚é
+                // è£œæ­£ã•ã‚ŒãŸåˆ†ã ã‘å¢ƒç•Œè§’åº¦ã«è¿‘ã¥ã‘ã‚‹
                 Quaternion newRot = Quaternion.RotateTowards(q, baseAng, angle - newAng);
                 return newRot;
             }
@@ -260,7 +260,7 @@ namespace Old.V1
             {
                 float angle = Quaternion.Angle(q, localOrigin);
                 q = q.normalized;
-                // freeAngleˆÈ‰º‚È‚ç•â³‚È‚µ
+                // freeAngleä»¥ä¸‹ãªã‚‰è£œæ­£ãªã—
                 if (angle < freeAngle)
                 {
                     return q;
@@ -268,11 +268,11 @@ namespace Old.V1
 
                 var newAng = AdjustOverLimitAngle(angle, softness);
 
-                // q‚ÉŠp“x‚ª‹ß‚¢•û‚ğ‘I‘ğ
+                // qã«è§’åº¦ãŒè¿‘ã„æ–¹ã‚’é¸æŠ
                 float ang1 = Quaternion.Angle(q, localMin);
                 float ang2 = Quaternion.Angle(q, localMax);
                 Quaternion baseAng = ang1 < ang2 ? localMin : localMax;
-                // •â³‚³‚ê‚½•ª‚¾‚¯‹«ŠEŠp“x‚É‹ß‚Ã‚¯‚é
+                // è£œæ­£ã•ã‚ŒãŸåˆ†ã ã‘å¢ƒç•Œè§’åº¦ã«è¿‘ã¥ã‘ã‚‹
                 Quaternion newRot = Quaternion.RotateTowards(q, baseAng, angle - newAng);
                 return newRot;
             }

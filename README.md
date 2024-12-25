@@ -1,4 +1,4 @@
-# BoneSwinger
+﻿# BoneSwinger
 
 BoneSwinger is a lightweight Unity asset designed to create dynamic, physics-like swinging motions for objects. While existing physics engines might seem like a viable solution for animating bones, they often present unexpected challenges, such as:  
 
