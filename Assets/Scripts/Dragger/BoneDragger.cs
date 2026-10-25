@@ -174,6 +174,23 @@ namespace Duel.BoneDragger
             }
         }
 
+        [Button("Convert to BoneSwing (new logic)")]
+        public void ConvertToBoneSwing()
+        {
+            var swing = GetComponent<BoneSwing>();
+            if (swing == null)
+            {
+#if UNITY_EDITOR
+                swing = UnityEditor.Undo.AddComponent<BoneSwing>(gameObject);
+                UnityEditor.Undo.RecordObject(this, "Convert to BoneSwing");
+#else
+                swing = gameObject.AddComponent<BoneSwing>();
+#endif
+            }
+            swing.SetBones(Bones.Where(b => b != null));
+            enabled = false;
+        }
+
         //[Button]
         private void SetRigidBodiesForNodes()
         {
