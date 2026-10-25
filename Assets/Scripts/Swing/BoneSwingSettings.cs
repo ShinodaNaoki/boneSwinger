@@ -42,11 +42,8 @@ namespace Duel.BoneDragger
         [Tooltip("ON: キャラのルート空間で計算し、キャラ自体の移動・反転を揺れに含めない")]
         public bool simulateInLocalSpace = false;
 
-        [Tooltip("根本(0)→先端(1) の復元力の倍率")]
+        [Tooltip("根本(0)→先端(1) の関節の硬さの倍率。根本だけ低くすると棒のように根本で振れ、先端ほど低くするとしなる")]
         public AnimationCurve stiffnessCurve = AnimationCurve.Linear(0, 1, 1, 1);
-
-        [Tooltip("根本(0)→先端(1) の重さの倍率。既定では重さはボーンの長さに比例し、これを掛けた後で総量 1 に正規化する")]
-        public AnimationCurve massCurve = AnimationCurve.Linear(0, 1, 1, 1);
 
         [Tooltip("根本(0)→先端(1) の空気抵抗（受風面積）の倍率。既定では面積はボーンの長さに比例し、これを掛けた後で総量 1 に正規化する")]
         public AnimationCurve airDragCurve = AnimationCurve.Linear(0, 1, 1, 1);
@@ -55,7 +52,6 @@ namespace Duel.BoneDragger
         {
             var c = (BoneSwingSettings)MemberwiseClone();
             c.stiffnessCurve = new AnimationCurve(stiffnessCurve.keys);
-            c.massCurve = new AnimationCurve(massCurve.keys);
             c.airDragCurve = new AnimationCurve(airDragCurve.keys);
             return c;
         }

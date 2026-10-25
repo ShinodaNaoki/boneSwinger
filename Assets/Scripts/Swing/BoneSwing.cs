@@ -10,7 +10,8 @@ namespace Duel.BoneDragger
     ///  - 復元力(竹):      曲げ角 θ に対して T(θ) = K·θ / (1 − |θ/θmax|^p) の硬化ばねを陰的に解く
     ///                     関節ごとに下流の慣性モーメント Σm·r² を使い、K と減衰もそれに比例させるので、
     ///                     どの関節も同じ周期 2π√(慣性/K) で揺れる（先端だけ細かく震えない）
-    ///  - 重さ・受風面積:  既定ではボーン長に比例（一様な紐）。カーブで分布を変え、総量は 1 に正規化する
+    ///  - 重さ・受風面積:  ボーン長に比例（一様な紐）。受風面積だけカーブで分布を変えられ、総量は 1 に正規化する
+    ///  - 長さ拘束は「動きにくさ」（慣性＋空気抵抗）で補正を配分する PBD。最後に根本から伸びを取り除く
     /// 長さはチェーン長で正規化し、時間は固定サブステップで刻むのでスケール・fps に依存しない。
     /// リストの最後のボーンは末端の目印として位置だけ使い、回転させない（BoneDragger と同じ）。
     /// </summary>
@@ -23,9 +24,17 @@ namespace Duel.BoneDragger
         private const float STIFFNESS_SCALE = 200f;
         private const float GRAVITY_SCALE = 50f;
         // はためき: 対気速度 1チェーン長/秒 あたりの周波数(Hz)、上限、粒子ごとの位相ずれ(進行波)
-        private const float FLUTTER_HZ = 3f;
-        private const float MAX_FLUTTER_HZ = 12f;
+        private const float FLUTTER_HZ = 2f;
+        private const float MAX_FLUTTER_HZ = 8f;
         private const float FLUTTER_WAVE = 0.9f;
+        // はためき 1 のときの横揺れ速度（対気速度比）と、根本→先端の効き方の指数
+        private const float FLUTTER_SCALE = 0.35f;
+        private const float FLUTTER_TIP_POWER = 3f;
+        // 反転時に広げた限界角のうち、現在の曲げ角が占める割合と、広げた分が閉じる速さ(1/秒)
+        private const float SLACK_FILL = 0.5f;
+        private const float SLACK_DECAY = 0.7f;
+        // 重み付き長さ拘束の反復回数
+        private const int CONSTRAINT_ITERATIONS = 6;
         private const float STEP = 1f / 60f;
         private const int MAX_STEPS = 8;
         private const float MAX_DELTA_TIME = 1f / 15f;
@@ -62,6 +71,8 @@ namespace Duel.BoneDragger
         private float[] animAngle;
         private float[] length;
         private float[] massWeight;
+        private float[] limitSlack;
+        private float[] invMass;
         private float[] areaWeight;
         private float[] prevBend;
         private float flutterPhase;
@@ -112,6 +123,8 @@ namespace Duel.BoneDragger
             animAngle = new float[n];
             length = new float[n];
             massWeight = new float[n];
+            limitSlack = new float[n];
+            invMass = new float[n];
             areaWeight = new float[n];
             prevBend = new float[n];
             flutterPhase = 0f;
@@ -192,7 +205,7 @@ namespace Duel.BoneDragger
 
         /// <summary>
         /// 粒子の重さと受風面積。隣接ボーン長の半分ずつを受け持つ（一様な紐なら長さに比例）。
-        /// カーブを掛けた後、平均 1 になるよう正規化する（＝慣性・空気抵抗スライダーは総量を表す）。
+        /// 平均 1 になるよう正規化する（＝慣性・空気抵抗スライダーは総量を表す）。受風面積だけはカーブで分布を変えられる。
         /// </summary>
         private void ComputeWeights(BoneSwingSettings s)
         {
@@ -201,7 +214,7 @@ namespace Duel.BoneDragger
             {
                 float share = 0.5f * (length[i - 1] + (i < n - 1 ? length[i] : 0f));
                 float t = (float)i / (n - 1);
-                massWeight[i] = share * Mathf.Max(0f, s.massCurve.Evaluate(t));
+                massWeight[i] = share;
                 areaWeight[i] = share * Mathf.Max(0f, s.airDragCurve.Evaluate(t));
                 sumMass += massWeight[i];
                 sumArea += areaWeight[i];
@@ -226,13 +239,15 @@ namespace Duel.BoneDragger
         }
 
         /// <summary>
-        /// ローカル空間モードではキャラの移動ごと粒子を運ぶ。ワールドモードでも左右反転した瞬間だけは運ぶ（反転で暴れないように）。
+        /// ローカル空間モードではキャラの移動・反転ごと粒子を運ぶ。
+        /// ワールドモードの反転（向き替え）では粒子をその場に残し、元のポーズ側だけが鏡映される。
+        /// 末端は空気抵抗・慣性で置いていかれ、復元力で新しい向きへ回り込む。
         /// </summary>
         private void CarryAlongWithSpace(BoneSwingSettings s)
         {
             var m = space.localToWorldMatrix;
             bool flipped = Det2D(m) * Det2D(prevSpace) < 0f;
-            if (s.simulateInLocalSpace || flipped)
+            if (s.simulateInLocalSpace)
             {
                 var delta = m * prevSpace.inverse;
                 for (int i = 0; i < n; i++)
@@ -241,11 +256,15 @@ namespace Duel.BoneDragger
                     vel[i] = delta.MultiplyVector(vel[i]);
                 }
                 prevRootPos = delta.MultiplyPoint3x4(prevRootPos);
+                if (flipped)
+                {
+                    // 鏡映で曲げ角の符号が逆になる
+                    for (int j = 0; j < n; j++) prevBend[j] = -prevBend[j];
+                }
             }
-            if (flipped)
+            else if (flipped)
             {
-                // 鏡映で曲げ角の符号が逆になる
-                for (int j = 0; j < n; j++) prevBend[j] = -prevBend[j];
+                LeaveBehindOnFlip(s);
             }
             prevSpace = m;
 
@@ -257,8 +276,37 @@ namespace Duel.BoneDragger
                     pos[i] = animPos[i];
                     vel[i] = Vector3.zero;
                     prevBend[i] = 0f;
+                    limitSlack[i] = 0f;
                 }
                 prevRootPos = animPos[0];
+            }
+        }
+
+        /// <summary>
+        /// 向き替えの瞬間の処理。
+        ///  - 根本は鏡映で反対側へ飛ぶので、チェーンを鏡映せずに根本の移動分だけ平行移動する
+        ///    （形は反転前のまま残り、そこから復元力で新しい向きへなびいていく。引きずられて飛ばない）
+        ///  - 元のポーズが鏡映されて曲げ角が限界を超えるので、そのままクランプすると一瞬で回転してしまう。
+        ///    現在の曲げ角まで限界を一時的に広げ（slack）、関節が戻るにつれて閉じる
+        ///  - 減衰が「反転による見かけの曲げ変化」に効かないよう基準を取り直す
+        /// </summary>
+        private void LeaveBehindOnFlip(BoneSwingSettings s)
+        {
+            var shift = animPos[0] - prevRootPos;
+            shift.z = 0f;
+            for (int i = 0; i < n; i++) pos[i] += shift;
+            prevRootPos = animPos[0];
+
+            float limit = s.angleLimit * Mathf.Deg2Rad;
+            float prevSimAngle = 0f;
+            for (int j = 0; j < n - 1; j++)
+            {
+                float simAngle = SegmentAngle(j);
+                float parentOffset = j == 0 ? 0f : prevSimAngle - animAngle[j - 1];
+                float theta = WrapAngle(simAngle - animAngle[j] - parentOffset);
+                prevBend[j] = theta;
+                limitSlack[j] = Mathf.Max(limitSlack[j], Mathf.Abs(theta) / SLACK_FILL - limit);
+                prevSimAngle = simAngle;
             }
         }
 
@@ -289,12 +337,13 @@ namespace Duel.BoneDragger
                 var force = gravity * massWeight[i];
                 if (s.flutter > 0f && c > EPS)
                 {
-                    // 対気速度に比例した横向きの力。粒子ごとに位相をずらして先端へ進む波にする
+                    // 対気速度に比例した横向きの力。粒子ごとに位相をずらして先端へ進む波にする。根本付近はほぼ効かない
                     var seg = pos[i] - pos[i - 1];
                     var normal = new Vector3(-seg.y, seg.x, 0f).normalized;
                     var rel = airVel - v;
                     float wave = Mathf.Sin(flutterPhase - i * FLUTTER_WAVE);
-                    force += normal * (s.flutter * c * new Vector2(rel.x, rel.y).magnitude * wave * ((float)i / (n - 1)));
+                    float tipFactor = Mathf.Pow((float)i / (n - 1), FLUTTER_TIP_POWER);
+                    force += normal * (FLUTTER_SCALE * s.flutter * c * new Vector2(rel.x, rel.y).magnitude * wave * tipFactor);
                 }
 
                 if (m <= EPS)
@@ -315,7 +364,31 @@ namespace Duel.BoneDragger
                 pos[i].z = animPos[i].z;
             }
 
-            // 2. 長さ拘束（根本から順に）
+            // 2. 長さ拘束
+            //  まず重さで補正を配分する（PBD: 動きにくい粒子ほど動かさない）。重い先端が軽い中間を引っぱり、まっすぐ張る。
+            //  「動きにくさ」は慣性と空気抵抗の両方（陰的オイラーの m/h² + c/h）。根本は固定。
+            invMass[0] = 0f;
+            for (int i = 1; i < n; i++)
+            {
+                float resist = s.inertia * massWeight[i] / (h * h) + drag * areaWeight[i] / h;
+                invMass[i] = resist > EPS ? 1f / resist : 1f / EPS;
+            }
+            for (int it = 0; it < CONSTRAINT_ITERATIONS; it++)
+            {
+                for (int i = 1; i < n; i++)
+                {
+                    float w0 = invMass[i - 1], w1 = invMass[i];
+                    if (w0 + w1 <= 0f) continue;
+                    var d = pos[i] - pos[i - 1];
+                    d.z = 0f;
+                    float dist = d.magnitude;
+                    if (dist <= EPS * chainLength) continue;
+                    var corr = d * ((dist - length[i - 1]) / dist / (w0 + w1));
+                    pos[i - 1] += corr * w0;
+                    pos[i] -= corr * w1;
+                }
+            }
+            //  残った伸び縮みを根本から順に取り除く
             for (int i = 1; i < n; i++)
             {
                 var d = pos[i] - pos[i - 1];
@@ -339,6 +412,8 @@ namespace Duel.BoneDragger
                 float theta = WrapAngle(simAngle - animAngle[j] - parentOffset);
 
                 // 下流の慣性モーメント・空気抵抗モーメント（距離はボーン平均長で正規化）
+                // 復元力も慣性モーメントに比例させるので、どの関節も同じ周期で揺れる。
+                // 関節ごとの硬さの違い（根本だけで曲がる棒状など）は stiffnessCurve で付ける
                 float massMoment = 0f, areaMoment = 0f;
                 for (int k = j + 1; k < n; k++)
                 {
@@ -354,11 +429,18 @@ namespace Duel.BoneDragger
                 float damper = s.damping * 2f * Mathf.Sqrt(stiffness * inertia) / h;
                 float resistance = inertia / (h * h) + drag * areaMoment / h;
 
-                float predicted = Mathf.Clamp(theta, -limit * 0.999f, limit * 0.999f);
+                // 反転直後は限界角を一時的に広げておき、戻るにつれて閉じる
+                float jointLimit = limit + limitSlack[j];
+                float predicted = Mathf.Clamp(theta, -jointLimit * 0.999f, jointLimit * 0.999f);
                 float target = resistance + damper > EPS
                     ? (resistance * predicted + damper * prevBend[j]) / (resistance + damper)
                     : predicted;
-                float solved = SolveBend(target, limit, s.hardening, stiffness, resistance + damper);
+                float solved = SolveBend(target, jointLimit, s.hardening, stiffness, resistance + damper);
+                if (limitSlack[j] > 0f)
+                {
+                    float needed = Mathf.Abs(solved) / SLACK_FILL - limit;
+                    limitSlack[j] = Mathf.Max(0f, Mathf.Min(limitSlack[j] * Mathf.Exp(-SLACK_DECAY * h), needed));
+                }
                 float correction = solved - theta;
                 if (Mathf.Abs(correction) > 0f)
                 {

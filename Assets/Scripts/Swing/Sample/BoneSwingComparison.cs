@@ -145,7 +145,8 @@ namespace Duel.BoneDragger.Sample
             }
 
             motionTime += Time.deltaTime * speed;
-            float a = amplitude * characterHeight;
+            // 動きの大きさはキャラの身長に対する相対値なので、キャラのスケールにも合わせる
+            float a = amplitude * characterHeight * characterScale;
             foreach (var rig in rigs)
             {
                 var offset = Vector3.zero;
@@ -242,7 +243,7 @@ namespace Duel.BoneDragger.Sample
             settings.airDrag = Slider("空気抵抗", settings.airDrag, 0f, 1f);
             settings.stiffness = Slider("復元力", settings.stiffness, 0f, 1f);
             GUILayout.Label(settings.inertia > 0f && settings.stiffness > 0f
-                ? $"　揺れの周期 ≈ {2f * Mathf.PI * Mathf.Sqrt(settings.inertia / (200f * settings.stiffness)):0.00} 秒"
+                ? $"　揺れの周期 ≈ {2f * Mathf.PI * Mathf.Sqrt(settings.inertia / (200f * settings.stiffness)):0.00} 秒（硬さ均一の場合）"
                 : "　揺れの周期: 慣性0か復元力0なので揺れ返さない");
             settings.damping = Slider("減衰", settings.damping, 0f, 1f);
             settings.flutter = Slider("はためき", settings.flutter, 0f, 1f);
@@ -261,11 +262,11 @@ namespace Duel.BoneDragger.Sample
             if (GUILayout.Button("ゴム止め")) Preset(0.7f, 0.15f, 0.15f, 0.2f, 0f, 40f, 8f, 0f);
             GUILayout.EndHorizontal();
 
-            GUILayout.Label("重さの分布（根本→先端）");
+            GUILayout.Label("硬さの分布（根本→先端）");
             GUILayout.BeginHorizontal();
-            if (GUILayout.Button("均一")) settings.massCurve = AnimationCurve.Linear(0, 1, 1, 1);
-            if (GUILayout.Button("先端が重い")) settings.massCurve = new AnimationCurve(new Keyframe(0, 0.3f), new Keyframe(0.7f, 0.5f), new Keyframe(1, 4f));
-            if (GUILayout.Button("根本が重い")) settings.massCurve = AnimationCurve.Linear(0, 2f, 1, 0.3f);
+            if (GUILayout.Button("均一")) settings.stiffnessCurve = AnimationCurve.Linear(0, 1, 1, 1);
+            if (GUILayout.Button("根本で振れる棒")) settings.stiffnessCurve = new AnimationCurve(new Keyframe(0, 0.3f), new Keyframe(0.25f, 6f), new Keyframe(1, 6f));
+            if (GUILayout.Button("先端ほどしなる")) settings.stiffnessCurve = AnimationCurve.Linear(0, 2f, 1, 0.3f);
             GUILayout.EndHorizontal();
 
             GUILayout.EndScrollView();
